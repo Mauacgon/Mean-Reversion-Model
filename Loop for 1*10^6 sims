@@ -1,0 +1,68 @@
+  Meanreversion <- function()
+  { ##Simulations
+  
+  m <- mean(datagenic$diff)
+  dvol <- sd(datagenic$diff)
+  
+  rnorm <- as.data.frame(rnorm(313, mean = m, sd = dvol))
+  
+  for (i in 1:1000)  {
+    rnorm[,i] <- rnorm(313, mean = m, sd = dvol)
+  }
+  
+  simulations <- rep(0.01083709-0.403072777458085, 313)
+  
+  for (i in 1:length(rnorm$V2)) {
+    simulations[i+1] <- simulations[i]+rnorm[i,1]+(beta*(simulations[i]-dgmean))
+  }
+  
+  plot(simulations, type = "l", col = "red", ylim = c(-3,3))
+  
+  lines(datagenic$Transport.spread)
+  
+  ###1000 simulations
+  
+  vector <- simulations
+  
+  for (j in 1:length(names(rnorm))) {
+    
+    for (i in 1:length(rnorm$V2)) {
+      simulations[i+1] <- simulations[i]+rnorm[i,j]+(beta*(simulations[i]-dgmean))
+    }
+    vector <- cbind(vector, simulations)
+  }  
+  
+  vector <- as.data.frame(vector)
+  names(vector) <- c(1:1001)
+  
+  plot(vector$`500`, type = "l", col = "red", ylim = c(-3,3))
+  
+  lines(datagenic$Transport.spread)
+  
+  ## Vector valuation
+  
+  vector <- as.matrix(vector[1:142,])
+  
+  payoffs <- pmax(vector,0)
+  
+  value <<- mean(payoffs[142,])
+  
+  outcome <- payoffs[142,]
+  
+  quantile(outcome, 0.05)
+  
+  value
+  
+  }
+  
+  number <- c(rep(0,100))
+  
+  for (i in 1:83) {
+    Meanreversion()
+    number[i] <- value
+    print(i)
+    print(value)
+    print(mean(number[number != 0]))
+  }
+  
+  mean(number)
