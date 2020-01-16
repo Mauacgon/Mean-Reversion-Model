@@ -72,65 +72,56 @@ names(tolmmodel) <- c("diff", "dtmean")
 tolmmodel <- tolmmodel[!is.na(tolmmodel$dtmean),]
 beta <- cov(tolmmodel$diff,tolmmodel$dtmean)/var(tolmmodel$dtmean, na.rm = TRUE)
 
-##Simulations
-
 m <- mean(datagenic$diff)
-dvol <- sd(datagenic$diff)
-
-rnorm <- as.data.frame(rnorm(313, mean = m, sd = dvol))
-
-for (i in 1:1000)  {
-  rnorm[,i] <- rnorm(313, mean = m, sd = dvol)
-}
-
-datagenic$lagdtmean <- lag(zoo(datagenic$dtmean), -1, na.pad = TRUE)
-
-simulations <- rep(0.105, 313)
-
-for (i in 1:length(rnorm$V2)) {
-  simulations[i+1] <- simulations[i]+rnorm[i,1]+(beta*(simulations[i]-dgmean))
-}
-
-plot(simulations, type = "l", col = "red", ylim = c(-3,3))
-
-lines(datagenic$Transport.spread)
-
-###1000 simulations
-
-vector <- simulations
-
-for (j in 1:length(names(rnorm))) {
+  dvol <- sd(datagenic$diff)
   
-  for (i in 1:length(rnorm$V2)) {
-    simulations[i+1] <- simulations[i]+rnorm[i,j]+(beta*(simulations[i]-dgmean))
+  vectorsd <- seq(from = 0.52, to = 0.29, by = -(0.52-0.29)/182)
+  
+  vectorbetas <- seq(from = -0.5020259, to = beta, by = (0.5020259+beta)/182)
+  
+  rnorm <- as.data.frame(rnorm(183, mean = m, sd = vectorsd))
+  
+  
+  
+  for (i in 1:1000)  {
+    rnorm[,i] <- rnorm(183, mean = m, sd = vectorsd)
   }
   
-  vector <- cbind(vector, simulations)
-}  
+  simulations <- rep(0.01083709, 183)
+  
+  ###1000 simulations
+  
+  vector <- simulations
+  
+  for (j in 1:length(names(rnorm))) {
+    
+    for (i in 1:length(rnorm$V2)) {
+      simulations[i+1] <- simulations[i]+rnorm[i,j]+(vectorbetas[i]*(simulations[i]-dgmean))
+    }
+    vector <- cbind(vector, simulations)
+  }  
+  
+  vector <- as.data.frame(vector)
+  names(vector) <- c(1:1001)
+  
+  plot(vector$`500`, type = "l", col = "red", ylim = c(-3,3))
+  
+  lines(datagenic$Transport.spread)
+  
+  ## Vector valuation
+  
+  vector <- as.matrix(vector[1:183,])
+  
+  payoffs <<- pmax(vector,0)
+  
+  value <<- mean(apply(payoffs, 1, mean))
+  
+  outcome <- payoffs[183,]
+  
+  
+  value
 
-vector <- as.data.frame(vector)
-names(vector) <- c(1:1001)
-
-plot(vector$`500`, type = "l", col = "red", ylim = c(-3,3))
-
-lines(datagenic$Transport.spread)
-
-## Vector valuation
-
-vector <- as.matrix(vector[1:86,])
-
-payoffs <- pmax(vector,0)
-
-value <- mean(payoffs[141,])
-
-outcome <- payoffs[141,]
-
-quantile(outcome, 0.05)
-
-vector <- as.data.frame(vector)
-
-payoffs <- as.data.frame(payoffs)
-
+##Plot analysis
 
 par(mfcol = c(1,2))
 
