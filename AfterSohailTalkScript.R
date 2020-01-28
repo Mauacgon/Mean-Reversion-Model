@@ -76,13 +76,13 @@ beta <- cov(tolmmodel$diff,tolmmodel$dtmean)/var(tolmmodel$dtmean, na.rm = TRUE)
 m <- mean(datagenic$diff)
 dvol <- sd(datagenic$diff)
 
-vectorsd <- rep(0.29,183)
+vectorsd <- rep(dvol,183)
 
 # Read the forward curve
 
 fcurve <- read.table("Fcurve.csv")
 
-fcurve$V1 <- fcurve$V1 -44.403072777458085
+fcurve$V1 <- fcurve$V1
 
 #Simulation of normals
 
